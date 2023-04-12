@@ -86,4 +86,4 @@ This program is licensed under the GPL-3.0 License
 - [ ] Handle errors better
 - [ ] Templates for the 4 kinds of scrapping
 - [ ] Organize the code better (currently spaghetti code)
-
+- [ ] Integrate a UID system
