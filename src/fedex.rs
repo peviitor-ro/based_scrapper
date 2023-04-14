@@ -16,11 +16,7 @@ struct Job {
     city: String,
 }
 
-async fn fetch_jobs(
-    url: String,
-    company_name: &str,
-    country_name: &str,
-) -> Result<Vec<Job>, Error> {
+async fn fetch_jobs(url: String,company_name: &str,country_name: &str,) -> Result<Vec<Job>, Error> {
     let response = reqwest::get(url).await?;
     let data: Value = response.json().await?;
     let jobs = data["jobs"].as_array().unwrap();
@@ -97,6 +93,7 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
         formatted_seconds
     );
     let mut file = File::create(output_file)?;
+    
     file.write_all(to_string_pretty(&job_results)?.as_bytes())?;
     Ok(())
 }

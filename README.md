@@ -30,6 +30,8 @@
 - HM
 - Kaufland
 - Medicover
+- Linde
+- Zentiva
 
 ## :scroll: Output
 For each company it creates a JSON object containing: 
@@ -87,3 +89,5 @@ This program is licensed under the GPL-3.0 License
 - [ ] Templates for the 4 kinds of scrapping
 - [ ] Organize the code better (currently spaghetti code)
 - [ ] Integrate a UID system
+- [ ] Send results to API
+- [ ] Implement update API algorithm 

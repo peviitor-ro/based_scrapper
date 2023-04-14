@@ -13,13 +13,14 @@ mod fedex;
 mod generali;
 mod hm;
 mod kaufland;
-//mod linde;
+mod linde;
 mod medicover;
+mod zentiva;
 use tokio::join;
 
 #[tokio::main]
 async fn main() {
-
+    let zentiva_result = zentiva::scrape();
     let enel_result = enel::scrape();
     let vodafone_future = vodafone::scrape();
     let bcr_future = bcr::scrape();
@@ -36,7 +37,7 @@ async fn main() {
     let hm_result = hm::scrape();
     let kaufland_resut = kaufland::scrape();
     let medicover_result = medicover::scrape();
-    // let linde_result = linde::scrape();
+    let linde_result = linde::scrape();
     let(
     vodafone_result, 
     bcr_result, 
@@ -54,7 +55,8 @@ async fn main() {
     hm_result,
     kaufland_resut,
     medicover_result,
-    //linde_result
+    zentiva_result,
+    linde_result
 ) = 
     join!(
         vodafone_future,
@@ -73,7 +75,8 @@ async fn main() {
         hm_result,
         kaufland_resut,
         medicover_result,
-       // linde_result
+        zentiva_result,
+        linde_result
     );  
 
 
@@ -128,10 +131,14 @@ async fn main() {
     if let Err(e) = medicover_result{
         eprintln!("error medicover {}", e)
     }
-  //  if let Err(e) = linde_result{
-  //      eprintln!("error linde {}", e)
-  //  }
-  
+    if let Err(e) = zentiva_result{
+        eprintln!("error medicover {}", e)
+    }
+
+    if let Err(e) = linde_result{
+        eprintln!("error linde {}", e)
+    }
+
 
 }
 
