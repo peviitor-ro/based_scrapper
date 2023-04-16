@@ -7,6 +7,21 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::time::SystemTime;
 
+
+async fn job_count() -> Result<u64, Box<dyn std::error::Error>> {
+    let url = "https://erstegroup-careers.com/bcr/search/?createNewAlert=false&q=";
+    let response = reqwest::get(url).await?;
+    let html = response.text().await?;
+
+    let document = Html::parse_document(&html);
+
+    let job_selector = Selector::parse("tr.data-row").unwrap();
+
+    let jobs_count = document.select(&job_selector).count().try_into()?;
+
+    Ok(jobs_count)
+}
+
 pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     let start = SystemTime::now();
     let url = "https://erstegroup-careers.com/bcr/search/?createNewAlert=false&q=";
@@ -60,6 +75,5 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
         document.select(&job_selector).count(),
         formatted_seconds
     );
-
     Ok(())
 }

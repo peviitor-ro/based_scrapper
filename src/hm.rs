@@ -60,7 +60,9 @@ async fn fetch_jobs(
     Ok(result)
 }
 
-async fn job_count(url: String) -> Result<u64, Error> {
+async fn job_count() -> Result<u64, Error> {
+
+    let url = "https://career.hm.com/wp-json/hm/v1/sr/jobs/search?_locale=user";
     let data = RequestBody {
         locations: vec![String::from("cou:ro")],
         workAreas: vec![],
@@ -84,7 +86,7 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     let company_name = "HM";
     let country_name = "Romania";
     let output_file = "hm.json";
-    let job_count = job_count(url.to_string()).await.unwrap();
+    let job_count = job_count().await.unwrap();
     let mut job_results = Vec::new();
     let total_pages = (job_count + 8) / 9; // Calculate the total number of pages
     let mut futures = Vec::new(); // Create a vector to store the futures
@@ -127,6 +129,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create(output_file)?;
     file.write_all(to_string_pretty(&job_results)?.as_bytes())?;
-
+     
     Ok(())
 }

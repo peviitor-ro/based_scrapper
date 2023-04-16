@@ -57,7 +57,9 @@ async fn fetch_jobs(url: String, company_name: String, country_name: String) -> 
     Ok(jobs)
 }
 
-async fn job_count(url: String) -> Result<u32, Error> {
+async fn job_count() -> Result<u64, Error> {
+
+    let url = "https://careers.eon.com/romania/go/Toate-joburile-din-Romania/3727401/?q=&sortColumn=referencedate&sortDirection=desc".to_string();
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
         .build()?;
@@ -71,7 +73,7 @@ async fn job_count(url: String) -> Result<u32, Error> {
     let second_b = element.select(&b_selector).nth(1).unwrap();
     let text = second_b.text().collect::<String>();
 
-    let count = text.chars().filter(|c| c.is_numeric()).collect::<String>().parse::<u32>().map_err(|e| e.into());
+    let count = text.chars().filter(|c| c.is_numeric()).collect::<String>().parse::<u64>().map_err(|e| e.into());
 
         count
 
@@ -84,7 +86,7 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     let country_name = "Romania";
     let output_file = "eon.json";
     let url = "https://careers.eon.com/romania/go/Toate-joburile-din-Romania/3727401/?q=&sortColumn=referencedate&sortDirection=desc".to_string();
-    let jobs_count = job_count(url).await.unwrap();
+    let jobs_count = job_count().await.unwrap();
     let mut startrow = 0;
     let mut job_results = Vec::new();
     let mut fetch_jobs_futures = stream::FuturesUnordered::new();
@@ -118,5 +120,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     println!("Parsed {} - Jobs found: {:?} - Took: {}s", company_name, job_results.len(), formatted_seconds);
     let mut file = File::create(output_file)?;
     file.write_all(to_string_pretty(&job_results)?.as_bytes())?;
+     
     Ok(())
 }

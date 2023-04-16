@@ -19,6 +19,21 @@ struct Job {
     city: String,
 }
 
+async fn job_count() -> Result<u64> {
+    let url = "https://www.autonom.ro/cariere";
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
+        .build()?;
+    let response = client.get(url).send().await.expect("Failed to fetch jobs");
+    let html = response.text().await?;
+
+    let document = Html::parse_document(&html);
+    let listing_selector = Selector::parse(".box-listing-job").unwrap();
+    let jobs_count = document.select(&listing_selector).count().try_into()?;
+
+    Ok(jobs_count)
+}
+
 async fn fetch_jobs(url: String, company_name: String, country_name: String) -> Result<Vec<Job>> {
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")

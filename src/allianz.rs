@@ -71,7 +71,7 @@ fn remove_duplicates(jobs: Vec<Job>) -> Vec<Job> {
     }
     results
 }
-async fn job_count() -> Result<u32, Error> {
+async fn job_count() -> Result<u64, Error> {
     let url = "https://careers.allianz.com/search/?searchby=location&createNewAlert=false&q=&locationsearch=Romania&optionsFacetsDD_department=&optionsFacetsDD_shifttype=&optionsFacetsDD_customfield3=&optionsFacetsDD_customfield2=&optionsFacetsDD_facility=&optionsFacetsDD_customfield4=&inputSearchValue=Romania&quatFlag=false";
     let response = reqwest::get(url).await?;
     let body = response.text().await?;
@@ -89,7 +89,7 @@ async fn job_count() -> Result<u32, Error> {
             }
         }
     }
-    Ok(jobs_count)
+    Ok(jobs_count.into())
 }
 
 pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {

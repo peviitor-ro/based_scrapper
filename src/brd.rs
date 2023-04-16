@@ -19,6 +19,31 @@ struct Job {
     city: String,
 }
 
+async fn job_count() -> Result<u64> {
+    let url = "https://www.brd.ro/ro/cariere";
+    let client = Client::builder()
+    .gzip(true)
+    .default_headers({
+        let mut headers = header::HeaderMap::new();
+        headers.insert(header::ACCEPT_LANGUAGE, "en-US,en;q=0.9".parse().unwrap());
+        headers.insert(header::ACCEPT_ENCODING, "gzip, deflate, br".parse().unwrap());
+        headers.insert(header::ACCEPT,"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8".parse().unwrap());
+        headers.insert(header::REFERER, "https://www.google.com/".parse().unwrap());
+        headers.insert(header::USER_AGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36".parse().unwrap());
+        headers
+    })
+    .build()?;
+
+    let response = client.get(url).send().await.expect("Failed to fetch jobs");
+    let html = response.text().await?;
+
+    let document = Html::parse_document(&html);
+    let listing_selector = Selector::parse(".col-sm-12.col-md-6").unwrap();
+    let jobs_count = document.select(&listing_selector).count().try_into().unwrap();
+
+    Ok(jobs_count)
+}
+
 async fn fetch_jobs(url: String, company_name: String, country_name: String) -> Result<Vec<Job>> {
     let client = Client::builder()
     .gzip(true)
@@ -100,5 +125,8 @@ pub async fn scrape() -> Result<()> {
     let mut file = File::create(output_file).context("Failed to create output file")?;
     file.write_all(serde_json::to_string_pretty(&jobs)?.as_bytes())
         .context("Failed to write to output file")?;
+     
     Ok(())
+
+
 }

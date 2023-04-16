@@ -19,6 +19,35 @@ struct Job {
     city: String,
 }
 
+async fn job_count() -> Result<u64> {
+    let url = "https://cariere.auchan.ro/";
+    let client = ClientBuilder::new()
+        .danger_accept_invalid_certs(true)
+        .build()?;
+    let response = client.get(url).send().await?;
+    let body = response.text().await?;
+    let document = Html::parse_document(&body);
+
+    let script_selector = Selector::parse("script").unwrap();
+    let mut json_data = String::new();
+
+    for script_element in document.select(&script_selector) {
+        let script_text = script_element.inner_html();
+        if script_text.contains("var vmCfg =") {
+            let re = regex::Regex::new(r#"var vmCfg = (\{.*\});"#).unwrap();
+            if let Some(captures) = re.captures(&script_text) {
+                json_data = captures[1].to_string();
+                break;
+            }
+        }
+    }
+    let vm_cfg: Value = serde_json::from_str(&json_data)?;
+    let position_list = vm_cfg["PositionList"].as_array().unwrap();
+    let jobs_count = position_list.len();
+
+    Ok(jobs_count as u64)
+}
+
 async fn fetch_jobs(
     url: String,
     company_name: String,

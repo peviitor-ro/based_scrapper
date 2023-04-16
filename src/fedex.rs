@@ -43,7 +43,8 @@ async fn fetch_jobs(url: String,company_name: &str,country_name: &str,) -> Resul
     Ok(result)
 }
 
-async fn job_count(url: String) -> Result<u64, Error> {
+async fn job_count() -> Result<u64, Error> {
+    let url="https://careers.fedex.com/api/jobs?location=Romania&woe=12&stretchUnit=MILES&stretch=10&page=1&limit=1&brand=FedEx%20Express%20EU".to_string();
     let response = reqwest::get(url).await?;
     let data: Value = response.json().await?;
     let count = data["totalCount"].as_u64().unwrap();
@@ -56,7 +57,7 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     let company_name = "Fedex";
     let country_name = "Romania";
     let output_file = "fedex.json";
-    let jobs_count = job_count(url).await.unwrap();
+    let jobs_count = job_count().await.unwrap();
     let mut current_page = 1;
     let mut job_results = Vec::new();
     let mut fetch_jobs_futures = stream::FuturesUnordered::new();
@@ -93,7 +94,8 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
         formatted_seconds
     );
     let mut file = File::create(output_file)?;
-    
+
     file.write_all(to_string_pretty(&job_results)?.as_bytes())?;
+     
     Ok(())
 }

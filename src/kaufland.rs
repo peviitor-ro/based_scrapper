@@ -31,11 +31,9 @@ async fn fetch_jobs(
     latitude: String,
     longitude: String,
 ) -> Result<Vec<Job>, Error> {
-    let base_url = "https://rmk-map-12.jobs2web.com/services/jobmap/jobs?siteid=Gi8p27qFoBvZm%2FcnHxoZEQ%3D%3D&mapType=GOOGLE_MAP&jobTitle=&coordinates=45.7684%2C24.1805&locale=ro_RO&brand=Romania&limittobrand=false".to_string();
-    let coordinates = format!("{},{}", latitude, longitude);
-    let url = base_url.replace(
-        "coordinates=43.7522%2C24.8637",
-        &format!("coordinates={}", coordinates),
+    let url = format!(
+        "https://rmk-map-12.jobs2web.com/services/jobmap/jobs?siteid=Gi8p27qFoBvZm%2FcnHxoZEQ%3D%3D&mapType=GOOGLE_MAP&jobTitle=&coordinates={}%2C{}&locale=ro_RO&brand=Romania&limittobrand=true",
+        latitude, longitude
     );
     let response = reqwest::get(url).await?;
     let data: Value = response.json().await?;
@@ -60,6 +58,20 @@ async fn fetch_jobs(
         });
     }
     Ok(result)
+}
+
+async fn job_count() -> Result<u64, Error> {
+    let url = "https://rmk-map-12.jobs2web.com/services/jobmap/jobs/facets?siteid=Gi8p27qFoBvZm%2FcnHxoZEQ%3D%3D&mapType=GOOGLE_MAP&jobTitle=&locale=ro_RO&brand=Romania&limittobrand=true";
+    let response = reqwest::get(url).await?;
+    let data: Value = response.json().await?;
+    let jobs = data.as_array().unwrap();
+    let mut result = 0;
+    for job in jobs {
+        let total = job["total"].as_u64().unwrap();
+        result += total;
+    }
+    Ok(result)
+
 }
 
 async fn get_coords() -> Result<String, Box<dyn std::error::Error>> {
@@ -118,6 +130,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create(output_file)?;
     file.write_all(to_string_pretty(&job_results)?.as_bytes())?;
-
+     
     Ok(())
 }

@@ -32,11 +32,18 @@ async fn fetch_job_list(url: String) -> Result<JobList, Error> {
     let job_list: JobList = reqwest::get(&url).await?.json().await?;
     Ok(job_list)
 }
+
+async fn job_count() -> Result<u64, Error> {
+    let url = "https://jobs.vodafone.com/api/apply/v2/jobs?domain=vodafone.com&location=Romania";
+    let job_list: JobList = reqwest::get(url).await?.json().await?;
+    Ok(job_list.count)
+}
+
 pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     let start = SystemTime::now();
 
     let base_url =
-        "https://jobs.vodafone.com/api/apply/v2/jobs?domain=vodafone.com&location=Romania";
+    "https://jobs.vodafone.com/api/apply/v2/jobs?domain=vodafone.com&location=Romania";
     let num = 10;
     let url = format!("{}&start=0&num={}", base_url, num);
     let job_list: JobList = reqwest::get(&url).await?.json().await?;
@@ -95,5 +102,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
         "Parsed Vodafone - Jobs found: {} - Took: {}s",
         count, formatted_seconds
     );
+     
     Ok(())
 }

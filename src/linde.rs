@@ -80,8 +80,9 @@ async fn fetch_jobs( url: &str, company_name: &str, country_name: &str, post_dat
 
 }
 
-async fn job_count(token: &str) -> Result<u64, Error> {
+async fn job_count() -> Result<u64, Error> {
     let url = "https://eu-fra.api.csod.com/rec-job-search/external/jobs";
+    let token = get_token().await?;
     let data = RequestBody {
         careerSiteId: 20,
         careerSitePageId: 20,
@@ -131,7 +132,7 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     let output_file = "linde.json";
     let token = get_token().await?;
     //    panic!("{}", token);
-    let job_count = job_count(&token).await.unwrap();
+    let job_count = job_count().await.unwrap();
     let mut job_results = Vec::new();
     let total_pages = (job_count + 19) / 20; // Calculate the total number of pages
     let mut futures = Vec::new(); // Create a vector to store the futures
@@ -185,6 +186,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create(output_file)?;
     file.write_all(to_string_pretty(&job_results)?.as_bytes())?;
-
+     
     Ok(())
 }

@@ -15,6 +15,14 @@ struct Job {
     city: String,
 }
 
+async fn job_count() -> Result<u64, Error> {
+    let url = "https://apply.workable.com/api/v1/widget/accounts/404273";
+    let response = reqwest::get(url).await?;
+    let data: Value = response.json().await?;
+    let jobs = data["jobs"].as_array().unwrap();
+    Ok(jobs.len() as u64)
+}
+
 async fn fetch_jobs(url: &str) -> Result<Vec<Job>, Error> {
     let response = reqwest::get(url).await?;
     let data: Value = response.json().await?;
@@ -72,6 +80,5 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
             println!("Error fetching jobs: {:?}", e);
         }
     }
-
     Ok(())
 }

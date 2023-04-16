@@ -83,6 +83,21 @@ async fn fetch_jobs(
     Ok(result)
 }
 
+async fn job_count() -> Result<u64, Box<dyn std::error::Error>> {
+    let url = "https://sec.wd3.myworkdayjobs.com/wday/cxs/sec/Samsung_Careers/jobs";
+    let post_data = RequestBody {
+        applied_facets: AppliedFacets {},
+        limit: 10,
+        offset: 0,
+        searchText: String::from(""),
+    };
+    let client = reqwest::Client::new();
+    let response = client.post(url).json(&post_data).send().await?;
+    let data: Value = response.json().await?;
+    let total_jobs = data["total"].as_u64().unwrap();
+    Ok(total_jobs)
+}
+
 pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     let start = SystemTime::now();
     let url = "https://sec.wd3.myworkdayjobs.com/wday/cxs/sec/Samsung_Careers/jobs";
@@ -122,6 +137,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
             println!("Error fetching jobs for {}: {:?}", company_name, e);
         }
     }
-
+     
     Ok(())
 }

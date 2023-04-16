@@ -16,6 +16,14 @@ struct Job {
     city: String,
 }
 
+async fn job_count() -> Result<u64, Error> {
+    let url = "https://mingle.ro/api/boards/mingle/jobs?q=companyUid~eq~%22medicover%22&page=0&pageSize=1000&sort=modifiedDate~DESC";
+    let response = reqwest::get(url).await?;
+    let data: Value = response.json().await?;
+    let jobs = data["data"]["results"].as_array().unwrap();
+    Ok(jobs.len() as u64)
+}
+
 async fn fetch_jobs(url: &str, company_name: &str, country_name: &str) -> Result<Vec<Job>, Error> {
     let response = reqwest::get(url).await?;
     let data: Value = response.json().await?;
@@ -76,5 +84,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+     
     Ok(())
 }

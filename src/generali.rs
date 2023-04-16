@@ -54,24 +54,26 @@ async fn fetch_jobs(url: String, company_name: String, country_name: String) -> 
     Ok(jobs)
 }
 
-//async fn job_count(url: String) -> Result<u32, Error> {
-//    let client = reqwest::Client::builder()
-//        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
-//        .build()?;
-//    let response = client.get(url).send().await?;
-//    let html = response.text().await?;
-//    let document = Html::parse_document(&html);
-//
-//    let selector = Selector::parse(".section__header__text__title.section__header__text__title--9").unwrap();
-//    let element = document.select(&selector).next().unwrap();
-//
-//    let text = element.text().collect::<String>();
-//
-//    let count = text.chars().filter(|c| c.is_numeric()).collect::<String>().parse::<u32>().map_err(|e| e.into());
-//
-//        count
-//
-//}
+async fn job_count() -> Result<u64> {
+    
+    let url = "https://cariere.generali.ro/jobs/search".to_string();
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36")
+        .build()?;
+    let response = client.get(url).send().await?;
+    let html = response.text().await?;
+    let document = Html::parse_document(&html);
+
+    let selector = Selector::parse(".h3-list-job-title").unwrap();
+    let element = document.select(&selector).next().unwrap();
+ 
+    // count the number of elements that have the class "h3-list-job-title"
+    let jobs_count = element.select(&selector).count();
+
+    Ok(jobs_count as u64)
+
+
+}
 
 
 pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
@@ -110,5 +112,6 @@ pub async fn scrape() -> Result<(), Box<dyn std::error::Error>> {
     println!("Parsed {} - Jobs found: {:?} - Took: {}s", company_name, job_results.len(), formatted_seconds);
     let mut file = File::create(output_file)?;
     file.write_all(to_string_pretty(&job_results)?.as_bytes())?;
+     
     Ok(())
 }
